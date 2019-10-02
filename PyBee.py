@@ -1,39 +1,31 @@
 import random
 from collections import OrderedDict
 
-scouts = 10
-bestSectorsBees = 5
-choosenSectorsBees = 2
-bestSectorsAmount = 2
-bestSectors = []
-choosenSectorsAmount = 3
-choosenSectors = []
-sectorRange = 2
-
-sectors = {}
-
+# Фитнесс-функция
 def f(x, y):
     return x ** 2 + y ** 2
 
-def fillBestAndChoosenSectors():
+# Заполнение лучших и выбранных секторов
+def fillBestAndChoosenSectors(sectors, bestSectorsAmount, choosenSectorsAmount):
     # Сортировка сектрово по значению функции
+    bestSectors = []
+    choosenSectors = []
     sortedSectors = sorted(sectors.keys())
     for i in sortedSectors:
         if len(bestSectors) <= bestSectorsAmount - 1:
             bestSectors.append(sectors[i])
         elif len(choosenSectors) <= choosenSectorsAmount - 1:
             choosenSectors.append(sectors[i])
-    #print('bestSectors',bestSectors)
+    return [bestSectors, choosenSectors]
 
-def getNewSectors():
+# Определение новых секторов на основе лучших и выбранных
+def getNewSectors(bestSectors, bestSectorsBees, choosenSectors, choosenSectorsBees, sectorRange):
     new_sectors = {}
-    print('bs',bestSectors)
-    print('cs',choosenSectors)
     for i in bestSectors:
         new_sectors[f(i[0], i[1])] = i
         x_range = [i[0] - sectorRange, i[0] + sectorRange]
         y_range = [i[1] - sectorRange, i[1] + sectorRange]
-        for bBee in range(bestSectorsBees-1):
+        for bBee in range(bestSectorsBees - 1):
             x_new = random.randint(x_range[0], x_range[1])
             y_new = random.randint(y_range[0], y_range[1])
             new_sectors[f(x_new, y_new)] = [x_new, y_new]
@@ -42,54 +34,62 @@ def getNewSectors():
         new_sectors[f(i[0], i[1])] = i
         x_range = [i[0] - sectorRange, i[0] + sectorRange]
         y_range = [i[1] - sectorRange, i[1] + sectorRange]
-        for bBee in range(choosenSectorsBees-1):
+        for bBee in range(choosenSectorsBees - 1):
             x_new = random.randint(x_range[0], x_range[1])
             y_new = random.randint(y_range[0], y_range[1])
             new_sectors[f(x_new, y_new)] = [x_new, y_new]
-    print('New',new_sectors)
     return new_sectors
 
-def makeIteration(sectors):
-    print('Sectors', sectors)
-    bestSectors = []
-    choosenSectors = []
-    fillBestAndChoosenSectors()
-    return  getNewSectors()
+# Начальная инициализация секторов
+def initSectors(scouts):
+    sectors = {}
+    for _ in range(scouts):
+        x = random.randint(-100, 100)
+        y = random.randint(-100, 100)
+        sectors[f(x, y)] = [x, y]
+    return sectors
 
+def main():
+    scouts = 10
 
+    # Кол-во пчел, отправляемых на лучшие сектора
+    bestSectorsBees = 5
 
+    # Кол-во пчел, отправляемых на выбранные участки
+    choosenSectorsBees = 2
 
-for _ in range(10):
-    x = random.randint(-100, 100)
-    y = random.randint(-100, 100)
-    sectors[f(x, y)] = [x, y]
+    # Кол-во лучших участков
+    bestSectorsAmount = 2
 
+    # Кол-во выбранных участков
+    choosenSectorsAmount = 3
 
-# Заполняем массив с лучшими и выбранными секторами
-#fillBestAndChoosenSectors()
+    # Размер сектора
+    sectorRange = 2
 
-# Из лучших и выбранных секторов получили список новый значений
-#sectors = getNewSectors()
-#print(sectors)
+    sectors = initSectors(scouts)
+    i = 0
 
-#Начало новой итерации
+    def makeIteration(sectors):
+        print('initial sectors: \n', sectors)
 
-sectors = makeIteration(sectors)
+        bestSectors, choosenSectors = fillBestAndChoosenSectors(sectors, bestSectorsAmount, choosenSectorsAmount)
 
-print('Sorted',sorted(sectors.keys()))
+        print('best sectors: \n', bestSectors)
+        print('chosen sectors: \n', choosenSectors)
 
-sectors = makeIteration(sectors)
-print('Sorted',sorted(sectors.keys()))
+        new_sectors = getNewSectors(bestSectors, bestSectorsBees, choosenSectors, choosenSectorsBees, sectorRange)
 
-sectors = makeIteration(sectors)
-print('Sorted',sorted(sectors.keys()))
+        print('new sectors: \n', new_sectors)
+        return new_sectors
 
-sectors = makeIteration(sectors)
-print('Sorted',sorted(sectors.keys()))
+    # Критерий останова - i-я итерация
+    while i < 100:
+        temp = makeIteration(sectors)
+        sectors = temp
+        i += 1
 
-sectors = makeIteration(sectors)
-print('Sorted',sorted(sectors.keys()))
+main()
 
-sectors = makeIteration(sectors)
-print('Sorted',sorted(sectors.keys()))
-
+# TODO: Перевести это все на функцию 3-х переменных
+# TODO: Посмотреть что там по заданию с нескольких прогонами, замерами, матожиданием и дисперсией
